@@ -16,11 +16,11 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
-	"github.com/Kwagmire/fleet-management-api/internal/pkg/db"
+	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
 	"github.com/kwagmire/fleet-management-api/internal/app/handlers"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
 
-	_ "github.com/kwagmire/fleet-management-api/docs"
+	//_ "github.com/kwagmire/fleet-management-api/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -34,9 +34,9 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/swagger/", httpSwagger.Handler(
+	/*mux.HandleFunc("/swagger/", httpSwagger.Handler(
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
-	))
+	))*/
 
 	mux.HandleFunc("POST /register", handlers.RegisterUser)
 	mux.HandleFunc("POST /login", handlers.LoginUser)
@@ -47,14 +47,14 @@ func main() {
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
 
-	c := cors.New(cors.Options{
+	/*c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})
 
-	handler := c.Handler(mux)
+	handler := c.Handler(mux)*/
 	serverPort := ":8080"
 
 	fmt.Printf("Fleet Management API server starting on http://localhost%s...", serverPort)

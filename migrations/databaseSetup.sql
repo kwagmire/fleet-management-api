@@ -58,7 +58,7 @@ CREATE TABLE vehicles (
 	--current_longitude DECIMAL(11, 8)
 );
 
-CREATE INDEX ON vehicles (current_driver_id);
+CREATE INDEX ON vehicleS (driver_id);
 CREATE INDEX ON vehicles (license_plate);
 CREATE INDEX ON vehicles (status);
 

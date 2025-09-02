@@ -19,7 +19,7 @@ func AddVehicle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userDetails, ok := auth.GetUserDetailsFromContext(r.Context())
+	_, ok := auth.GetUserDetailsFromContext(r.Context())
 	if !ok {
 		respondWithError(w, "User details not found in context. Authentication is required", http.StatusUnauthorized)
 		return
@@ -39,12 +39,12 @@ func AddVehicle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if thisRequest.Make == "" || thisRequest.Model == "" ||
-		thisRequest.Year == "" || thisRequest.LicensePlate == "" {
+		thisRequest.Year <= 0 || thisRequest.LicensePlate == "" {
 		respondWithError(w, "All fields are required", http.StatusBadRequest)
 		return
 	}
 
-	thisVehicle := Vehicle{
+	thisVehicle := models.Vehicle{
 		Make:         thisRequest.Make,
 		Model:        thisRequest.Model,
 		Year:         thisRequest.Year,
@@ -134,7 +134,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 			&thisVehicle.LicensePlate,
 			&thisVehicle.Status,
 			&thisVehicle.DriverName,
-			&thisVehicle.DriverEmail
+			&thisVehicle.DriverEmail,
 		); err != nil {
 			respondWithError(w, "Error scanning todo row: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -146,7 +146,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]interface{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles)})
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles)})
 }
 
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {

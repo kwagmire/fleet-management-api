@@ -71,19 +71,19 @@ func AuthMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			respondWithError(w, "Authorization header required", http.StatusUnauthorized)
+			http.Error(w, "Authorization header required", http.StatusUnauthorized)
 			return
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader { // No "Bearer " prefix found
-			respondWithError(w, "Invalid token format (expected 'Bearer <token>')", http.StatusUnauthorized)
+			http.Error(w, "Invalid token format (expected 'Bearer <token>')", http.StatusUnauthorized)
 			return
 		}
 
 		claims, err := ValidateToken(tokenString)
 		if err != nil {
-			respondWithError(w, "Invalid or expired token: "+err.Error(), http.StatusUnauthorized)
+			http.Error(w, "Invalid or expired token: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 
@@ -96,7 +96,7 @@ func RequirePermission(permission string, nextHandler http.HandlerFunc) http.Han
 		// Get the claims from the request context
 		userDetails, ok := GetUserDetailsFromContext(r.Context())
 		if !ok {
-			respondWithError(w, "Authentication context missing", http.StatusForbidden)
+			http.Error(w, "Authentication context missing", http.StatusForbidden)
 			return
 		}
 
@@ -111,7 +111,7 @@ func RequirePermission(permission string, nextHandler http.HandlerFunc) http.Han
 
 		if !hasPermission {
 			log.Printf("User lacks required permission: %s", permission)
-			respondWithError(w, "Forbidden", http.StatusForbidden)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 
@@ -120,7 +120,7 @@ func RequirePermission(permission string, nextHandler http.HandlerFunc) http.Han
 	}
 }
 
-func GetUserDetailsFromContext(ctx context.Context) (userDetails, bool) {
-	userDetails, ok := ctx.Value(userIDContextKey).(*UserClaims)
+func GetUserDetailsFromContext(ctx context.Context) (*UserClaims, bool) {
+	userDetails, ok := ctx.Value(userDetailsKey).(*UserClaims)
 	return userDetails, ok
 }
