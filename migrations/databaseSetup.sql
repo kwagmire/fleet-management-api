@@ -31,16 +31,15 @@ CREATE TABLE users (
 	fullname VARCHAR(100) NOT NULL,
 	password_hash VARCHAR(255) NOT NULL,
 	email VARCHAR(100) UNIQUE NOT NULL,
-	role_id INTEGER REFERENCES roles(id) ON DELETE RESTRICT NOT NULL,
+	role VARCHAR(50) REFERENCES roles(name) ON DELETE RESTRICT NOT NULL
 );
 
-CREATE INDEX ON users (role_id);
+CREATE INDEX ON users (role);
 
 -- 5. Drivers Table: Stores driver-specific information.
 CREATE TABLE drivers (
-	id SERIAL PRIMARY KEY,
-	user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-	license_number VARCHAR(50) UNIQUE NOT NULL,
+	user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+	license_id VARCHAR(50) UNIQUE NOT NULL,
 	assigned BOOLEAN NOT NULL DEFAULT FALSE
 );
 
@@ -54,7 +53,7 @@ CREATE TABLE vehicles (
 	year INTEGER,
 	license_plate VARCHAR(20) UNIQUE NOT NULL,
 	status VARCHAR(20) NOT NULL CHECK (status IN ('available', 'in_use', 'maintenance', 'out_of_service')),
-	current_driver_id INTEGER UNIQUE REFERENCES drivers(id) ON DELETE SET NULL, -- A vehicle can only have one driver at a time.
+	driver_id INTEGER UNIQUE REFERENCES drivers(user_id) ON DELETE SET NULL -- A vehicle can only have one driver at a time.
 	--current_latitude DECIMAL(10, 8),
 	--current_longitude DECIMAL(11, 8)
 );
@@ -79,10 +78,9 @@ CREATE TABLE location_updates (
 --
 
 INSERT INTO roles (name) VALUES
+('superadmin'),
 ('admin'),
---('fleet_manager'),
-('driver'),
---('mechanic');
+('driver');
 
 INSERT INTO permissions (name) VALUES
 ('vehicle.create'),
@@ -92,9 +90,9 @@ INSERT INTO permissions (name) VALUES
 ('driver.create'),
 ('driver.read'),
 ('driver.update'),
-('driver.delete'),
+('driver.delete');
 --('location.read'),
---('location.update');
+--('location.update'),
 
 -- Example: The admin role has all permissions.
 INSERT INTO role_permissions (role_id, permission_id)
