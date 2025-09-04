@@ -24,7 +24,7 @@ import (
 // @Failure 400 {string} string "Invalid request payload"
 // @Failure 403 {string} string "User exists"
 // @Router /register [post]
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
+func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		respondWithError(w, "Unaccepted method", http.StatusMethodNotAllowed)
 		return
@@ -43,16 +43,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if thisRequest.Email == "" || thisRequest.Name == "" || thisRequest.Role == "" {
-		respondWithError(w, "Email, name or role can't be empty", http.StatusBadRequest)
+	if thisRequest.Email == "" || thisRequest.Name == "" || thisRequest.LicenseID == "" {
+		respondWithError(w, "Email, name or license ID can't be empty", http.StatusBadRequest)
 		return
 	}
 	if len(thisRequest.Password) < 8 {
 		respondWithError(w, "Password must be at least 8 characters long", http.StatusBadRequest)
-		return
-	}
-	if thisRequest.Role == "driver" && (thisRequest.LicenseID == nil || *thisRequest.LicenseID == "") {
-		respondWithError(w, "License ID is required to register as a driver", http.StatusBadRequest)
 		return
 	}
 
@@ -71,7 +67,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		) VALUES ($1, $2, $3, $4
 		) RETURNING id`
 	var userID int
-	err = db.DB.QueryRow(query, thisRequest.Name, string(hashedPassword), thisRequest.Email, thisRequest.Role).Scan(&userID)
+	err = db.DB.QueryRow(query, thisRequest.Name, string(hashedPassword), thisRequest.Email, "driver").Scan(&userID)
 	if err != nil {
 		if dbError, ok := err.(*pq.Error); ok && dbError.Code.Name() == "unique_violation" {
 			http.Error(w, "Email already exists", http.StatusConflict)
@@ -80,17 +76,14 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if thisRequest.Role == "driver" {
-		query = `
-			INSERT INTO drivers (
-				user_id,
-				license_id
-			) VALUES ($1, $2);`
-		_, err = db.DB.Exec(query, userID, *thisRequest.LicenseID)
-		if err != nil {
-			respondWithError(w, "Failed to register driver: "+err.Error(), http.StatusInternalServerError)
-		}
+	query = `
+		INSERT INTO drivers (
+			user_id,
+			license_id
+		) VALUES ($1, $2);`
+	_, err = db.DB.Exec(query, userID, thisRequest.LicenseID)
+	if err != nil {
+		respondWithError(w, "Failed to register driver: "+err.Error(), http.StatusInternalServerError)
 	}
 
 	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "User registration successful. Login to get started!"})

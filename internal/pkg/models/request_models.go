@@ -1,11 +1,10 @@
 package models
 
 type RegisterRequest struct {
-	Name      string  `json:"fullname"`
-	Email     string  `json:"email"`
-	Password  string  `json:"password"`
-	Role      string  `json:"role"`
-	LicenseID *string `json:"license_id,omitempty"`
+	Name      string `json:"fullname"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	LicenseID string `json:"license_id"`
 }
 
 type LoginRequest struct {

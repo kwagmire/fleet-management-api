@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
@@ -77,7 +75,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userDetails, ok := auth.GetUserDetailsFromContext(r.Context())
+	_, ok := auth.GetUserDetailsFromContext(r.Context())
 	if !ok {
 		respondWithError(w, "User details not found in context. Authentication is required", http.StatusUnauthorized)
 		return
@@ -123,7 +121,6 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var vehicles []models.Vehicle
-	var email string
 	for rows.Next() {
 		var thisVehicle models.Vehicle
 		if err := rows.Scan(
@@ -149,6 +146,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles)})
 }
 
+/*
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Unaccepted method", http.StatusMethodNotAllowed)
@@ -316,4 +314,4 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
+}*/

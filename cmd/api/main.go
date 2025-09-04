@@ -14,15 +14,39 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 
-	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
 	"github.com/kwagmire/fleet-management-api/internal/app/handlers"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
-
+	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
 	//_ "github.com/kwagmire/fleet-management-api/docs"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+/*func addSAdmin(fullname, email, password string) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Errorf("couldn't hash")
+		return
+	}
+
+	query := `
+		INSERT INTO users (
+			fullname,
+			password_hash,
+			email,
+			role
+		) VALUES ($1, $2, $3, $4
+		) RETURNING id`
+	var userID int
+	err = db.DB.QueryRow(query, fullname, string(hashedPassword), email, "superadmin").Scan(&userID)
+	if err != nil {
+		if dbError, ok := err.(*pq.Error); ok && dbError.Code.Name() == "unique_violation" {
+			fmt.Errorf("Email already exists")
+			return
+		}
+		fmt.Errorf("Failed to register user: " + err.Error())
+		return
+	}
+}*/
 
 func main() {
 	err := godotenv.Load()
@@ -31,6 +55,8 @@ func main() {
 	}
 
 	db.ConnectDB()
+
+	addSAdmin("Boluwatiwi Oyebamiji", "boluwatiwioyebamiji@gmail.com", "datamayor")
 
 	mux := http.NewServeMux()
 
@@ -41,8 +67,8 @@ func main() {
 	mux.HandleFunc("POST /register", handlers.RegisterUser)
 	mux.HandleFunc("POST /login", handlers.LoginUser)
 
-	mux.HandleFunc("POST /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.create", handlers.AddVehicle))
-	mux.HandleFunc("GET /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.read", handlers.GetAllVehicles))
+	mux.HandleFunc("POST /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.create", handlers.AddVehicle)))
+	mux.HandleFunc("GET /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.read", handlers.GetAllVehicles)))
 
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
@@ -58,5 +84,5 @@ func main() {
 	serverPort := ":8080"
 
 	fmt.Printf("Fleet Management API server starting on http://localhost%s...", serverPort)
-	log.Fatal(http.ListenAndServe(serverPort, handler))
+	log.Fatal(http.ListenAndServe(serverPort, mux))
 }
