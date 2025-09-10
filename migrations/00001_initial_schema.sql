@@ -1,4 +1,4 @@
---
+-- +goose Up
 -- This script sets up the database schema for the Fleet Management System MVP.
 -- It creates all the necessary tables with their respective columns and constraints.
 --
@@ -45,41 +45,39 @@ CREATE TABLE drivers (
 
 CREATE INDEX ON drivers (user_id);
 
+CREATE TABLE vehicle_owners (
+	user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+	fleet_size INTEGER NOT NULL CHECK (fleet_size >= 0)
+);
+
+CREATE INDEX ON vehicle_owners (user_id);
+
 -- 6. Vehicles Table: Stores information about the fleet's vehicles.
 CREATE TABLE vehicles (
 	id SERIAL PRIMARY KEY,
 	make VARCHAR(50) NOT NULL,
 	model VARCHAR(50) NOT NULL,
-	year INTEGER,
+	year INTEGER NOT NULL,
 	license_plate VARCHAR(20) UNIQUE NOT NULL,
 	status VARCHAR(20) NOT NULL CHECK (status IN ('available', 'in_use', 'maintenance', 'out_of_service')),
-	driver_id INTEGER UNIQUE REFERENCES drivers(user_id) ON DELETE SET NULL -- A vehicle can only have one driver at a time.
+	driver_id INTEGER UNIQUE REFERENCES drivers(user_id) ON DELETE SET NULL, -- A vehicle can only have one driver at a time.
+	owner_id INTEGER UNIQUE REFERENCES vehicle_owners(user_id) ON DELETE CASCADE
 	--current_latitude DECIMAL(10, 8),
 	--current_longitude DECIMAL(11, 8)
 );
 
-CREATE INDEX ON vehicleS (driver_id);
+CREATE INDEX ON vehicles (driver_id);
+CREATE INDEX ON vehicles (owner_id);
 CREATE INDEX ON vehicles (license_plate);
 CREATE INDEX ON vehicles (status);
-
-/* 
-7. Location Updates Table: Logs historical location data for vehicles.
-CREATE TABLE location_updates (
-	    id SERIAL PRIMARY KEY,
-	    vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE NOT NULL,
-	    latitude DECIMAL(10, 8) NOT NULL,
-	    longitude DECIMAL(11, 8) NOT NULL,
-	    timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
- */
 
 --
 -- Insert initial data to get started
 --
 
 INSERT INTO roles (name) VALUES
-('superadmin'),
-('admin'),
+('super_admin'),
+('vehicle_owner'),
 ('driver');
 
 INSERT INTO permissions (name) VALUES
@@ -96,11 +94,16 @@ INSERT INTO permissions (name) VALUES
 
 -- Example: The admin role has all permissions.
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p WHERE r.name = 'admin';
+SELECT r.id, p.id FROM roles r, permissions p WHERE r.name = 'superadmin';
 
-/*
-Example: The driver role can only read vehicle data and update location.
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p
-WHERE r.name = 'driver' AND p.name IN ('vehicle.read', 'location.update');
-*/
+
+-- +goose Down
+
+DROP TABLE IF EXISTS vehicles;
+DROP TABLE IF EXISTS vehicle_owners;
+DROP TABLE IF EXISTS drivers;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS role_permissions;
+
+DROP TABLE IF EXISTS permissions;
+DROP TABLE IF EXISTS roles;

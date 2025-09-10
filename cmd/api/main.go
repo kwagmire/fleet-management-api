@@ -18,6 +18,7 @@ import (
 	"github.com/kwagmire/fleet-management-api/internal/app/handlers"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
+	"github.com/kwagmire/fleet-management-api/migrations"
 	//_ "github.com/kwagmire/fleet-management-api/docs"
 )
 
@@ -53,6 +54,8 @@ func main() {
 	if err != nil {
 		log.Println("Warning: Could not load .env file. Assuming environment variables are set in the environment.")
 	}
+
+	migrations.RunMigrations()
 
 	db.ConnectDB()
 
