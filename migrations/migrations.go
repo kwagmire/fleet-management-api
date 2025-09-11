@@ -14,7 +14,7 @@ func RunMigrations() {
 	//goose.SetDir("./migrations")
 
 	// Run the migrations
-	if err := goose.Up(db.DB, "./migrations"); err != nil {
+	if err := goose.Up(db.DB, "../../migrations"); err != nil {
 		log.Fatalf("goose: failed to run migrations: %v\n", err)
 	}
 
