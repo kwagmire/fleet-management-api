@@ -43,12 +43,16 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if thisRequest.Email == "" || thisRequest.Name == "" || thisRequest.LicenseID == "" {
-		respondWithError(w, "Email, name or license ID can't be empty", http.StatusBadRequest)
+	if thisRequest.Email == "" || thisRequest.Name == "" || thisRequest.Role == "" {
+		respondWithError(w, "Email, name or role can't be empty", http.StatusBadRequest)
 		return
 	}
 	if len(thisRequest.Password) < 8 {
 		respondWithError(w, "Password must be at least 8 characters long", http.StatusBadRequest)
+		return
+	}
+	if thisRequest.Role == "driver" && (thisRequest.LicenseID == nil || *thisRequest.LicenseID == "") {
+		respondWithError(w, "License ID is required to register as a driver", http.StatusBadRequest)
 		return
 	}
 
@@ -76,14 +80,18 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	query = `
-		INSERT INTO drivers (
-			user_id,
-			license_id
-		) VALUES ($1, $2);`
-	_, err = db.DB.Exec(query, userID, thisRequest.LicenseID)
-	if err != nil {
-		respondWithError(w, "Failed to register driver: "+err.Error(), http.StatusInternalServerError)
+
+	if thisRequest.Role == "driver" {
+		query = `
+			INSERT INTO drivers (
+				user_id,
+				license_id
+			) VALUES ($1, $2);`
+		_, err = db.DB.Exec(query, userID, thisRequest.LicenseID)
+		if err != nil {
+			respondWithError(w, "Failed to register driver: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "User registration successful. Login to get started!"})
@@ -126,8 +134,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	query := `
 		SELECT
 			u.id,
-			u.password_hash
-			r.name
+			u.password_hash,
+			r.name,
 			array_agg(p.name) AS permission_list
 		FROM users AS u
 		JOIN roles AS r
@@ -139,7 +147,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		WHERE u.email = $1
 		GROUP BY
 			u.id,
-			u.password_hash,
 			r.name;
 		`
 	var userID int
@@ -152,7 +159,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		respondWithError(w, "Database error", http.StatusInternalServerError)
+		respondWithError(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
