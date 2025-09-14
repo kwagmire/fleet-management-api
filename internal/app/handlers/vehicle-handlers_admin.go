@@ -112,7 +112,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 			users AS u
 			ON d.user_id = u.id
 		ORDER BY id ASC
-		LIMIT $2 OFFSET $3`
+		LIMIT $1 OFFSET $2`
 	rows, err := db.DB.Query(query, limit, offset)
 	if err != nil {
 		respondWithError(w, "Failed to retrieve vehicles: "+err.Error(), http.StatusInternalServerError)
