@@ -24,7 +24,7 @@ import (
 // @Failure 400 {string} string "Invalid request payload"
 // @Failure 403 {string} string "User exists"
 // @Router /register [post]
-func RegisterDriver(w http.ResponseWriter, r *http.Request) {
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		respondWithError(w, "Unaccepted method", http.StatusMethodNotAllowed)
 		return
@@ -155,7 +155,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	var permissions []string
 	err = db.DB.QueryRow(query, thisRequest.Email).Scan(&userID, &hashedPassword, &role, (*pq.StringArray)(&permissions))
 	if err == sql.ErrNoRows {
-		respondWithError(w, "Invalid credentials", http.StatusUnauthorized)
+		respondWithError(w, "User account doesn't exist", http.StatusUnauthorized)
 		return
 	}
 	if err != nil {

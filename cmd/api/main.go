@@ -67,7 +67,7 @@ func main() {
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
 	))*/
 
-	mux.HandleFunc("POST /register", handlers.RegisterDriver)
+	mux.HandleFunc("POST /register", handlers.RegisterUser)
 	mux.HandleFunc("POST /login", handlers.LoginUser)
 
 	mux.HandleFunc("POST /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.create", handlers.AddVehicle)))
