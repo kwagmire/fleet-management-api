@@ -71,7 +71,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		) VALUES ($1, $2, $3, $4
 		) RETURNING id`
 	var userID int
-	err = db.DB.QueryRow(query, thisRequest.Name, string(hashedPassword), thisRequest.Email, "driver").Scan(&userID)
+	err = db.DB.QueryRow(query, thisRequest.Name, string(hashedPassword), thisRequest.Email, thisRequest.Role).Scan(&userID)
 	if err != nil {
 		if dbError, ok := err.(*pq.Error); ok && dbError.Code.Name() == "unique_violation" {
 			http.Error(w, "Email already exists", http.StatusConflict)
