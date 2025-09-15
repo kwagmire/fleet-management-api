@@ -70,8 +70,14 @@ func main() {
 	mux.HandleFunc("POST /register", handlers.RegisterUser)
 	mux.HandleFunc("POST /login", handlers.LoginUser)
 
-	mux.HandleFunc("POST /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.create", handlers.AddVehicle)))
-	mux.HandleFunc("GET /vehicles", auth.AuthMiddleware(auth.RequirePermission("vehicle.read", handlers.GetAllVehicles)))
+	mux.HandleFunc(
+		"POST /vehicles",
+		auth.AuthMiddleware(auth.RequirePermission("owner:create.vehicle", handlers.AddVehicle)),
+	)
+	mux.HandleFunc(
+		"GET /vehicles",
+		auth.AuthMiddleware(auth.RequirePermission("admin:read.vehicle", handlers.GetAllVehicles)),
+	)
 
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
