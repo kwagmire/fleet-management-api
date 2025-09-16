@@ -94,6 +94,19 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if thisRequest.Role == "vehicle_owner" {
+		query = `
+			INSERT INTO vehicle_owners (
+				user_id,
+				fleet_size
+			) VALUES ($1, $2);`
+		_, err = db.DB.Exec(query, userID, 0)
+		if err != nil {
+			respondWithError(w, "Failed to register vehicle_owner: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "User registration successful. Login to get started!"})
 }
 
