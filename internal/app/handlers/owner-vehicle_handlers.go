@@ -67,6 +67,18 @@ func AddVehicle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query = `
+		UPDATE vehicle_owners
+		SET
+			fleet_size = fleet_size + 1
+		WHERE
+			user_id = $1`
+	_, err = db.DB.Exec(query, userDetails.UserID)
+	if err != nil {
+		respondWithError(w, "Failed to update user details"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	respondWithJSON(w, http.StatusCreated, thisVehicle)
 }
 
@@ -95,7 +107,18 @@ func GetMyVehicles(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * limit
 
+	var fleet_size int
 	query := `
+		SELECT fleet_size FROM vehicle_owners
+		WHERE
+			user_id = $1`
+	_, err = db.DB.QueryRow(query, userDetails.UserID).Scan(&fleet_size)
+	if err != nil {
+		respondWithError(w, "Failed to get fleet details"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	query = `
 		SELECT
 			v.id,
 			v.make,
@@ -145,5 +168,5 @@ func GetMyVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles)})
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles), "fleet_size": fleet_size})
 }
