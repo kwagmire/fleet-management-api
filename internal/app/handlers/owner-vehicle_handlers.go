@@ -112,7 +112,7 @@ func GetMyVehicles(w http.ResponseWriter, r *http.Request) {
 		SELECT fleet_size FROM vehicle_owners
 		WHERE
 			user_id = $1`
-	_, err = db.DB.QueryRow(query, userDetails.UserID).Scan(&fleet_size)
+	err = db.DB.QueryRow(query, userDetails.UserID).Scan(&fleet_size)
 	if err != nil {
 		respondWithError(w, "Failed to get fleet details"+err.Error(), http.StatusInternalServerError)
 		return
