@@ -75,6 +75,11 @@ func main() {
 		auth.AuthMiddleware(auth.RequirePermission("owner:create.vehicle", handlers.AddVehicle)),
 	)
 	mux.HandleFunc(
+		"GET /myvehicles",
+		auth.AuthMiddleware(auth.RequirePermission("owner:read.vehicle", handlers.GetMyVehicles)),
+	)
+
+	mux.HandleFunc(
 		"GET /vehicles",
 		auth.AuthMiddleware(auth.RequirePermission("admin:read.vehicle", handlers.GetAllVehicles)),
 	)
