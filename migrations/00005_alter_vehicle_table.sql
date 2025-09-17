@@ -3,6 +3,8 @@
 ALTER TABLE vehicles
 DROP CONSTRAINT vehicles_owner_id_key;
 
+DELETE FROM vehicles WHERE year < 2005;
+
 ALTER TABLE vehicles
 ADD CONSTRAINT check_vehicle_year CHECK (year >= 2005);
 
