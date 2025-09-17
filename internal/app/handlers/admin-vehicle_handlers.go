@@ -42,8 +42,11 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 			v.year,
 			v.license_plate,
 			v.status,
-			u.fullname,
-			u.email
+			u.fullname AS driver_name,
+			u.email AS driver_email,
+			uo.fullname AS owner_name,
+			uo.email AS owner_email,
+			COUNT(*) OVER () AS total_rows
 		FROM vehicles AS v
 		LEFT JOIN
 			drivers AS d
@@ -51,6 +54,9 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN
 			users AS u
 			ON d.user_id = u.id
+		LEFT JOIN
+			users AS uo
+			ON v.owner_id = uo.id
 		ORDER BY id ASC
 		LIMIT $1 OFFSET $2`
 	rows, err := db.DB.Query(query, limit, offset)
@@ -61,6 +67,7 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var vehicles []models.Vehicle
+	var fleet_size int
 	for rows.Next() {
 		var thisVehicle models.Vehicle
 		if err := rows.Scan(
@@ -72,6 +79,9 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 			&thisVehicle.Status,
 			&thisVehicle.DriverName,
 			&thisVehicle.DriverEmail,
+			&thisVehicle.OwnerName,
+			&thisVehicle.OwnerEmail,
+			&fleet_size,
 		); err != nil {
 			respondWithError(w, "Error scanning todo row: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -83,5 +93,5 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles)})
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles), "fleet_size": fleet_size})
 }

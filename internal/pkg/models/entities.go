@@ -11,6 +11,8 @@ type Vehicle struct {
 	Status       string         `json:"status"`
 	DriverName   sql.NullString `json:"driver_name"` // sql.NullInt64 for nullable foreign key
 	DriverEmail  sql.NullString `json:"driver_email"`
+	OwnerName    sql.NullString `json:"owner_name"`
+	OwnerEmail   sql.NullString `json:"owner_email"`
 	//CurrentLatitude  float64       `json:"current_latitude"`
 	//CurrentLongitude float64       `json:"current_longitude"`
 }
