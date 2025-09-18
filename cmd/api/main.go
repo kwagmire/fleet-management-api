@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 
 	"github.com/kwagmire/fleet-management-api/internal/app/handlers"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
@@ -87,16 +88,16 @@ func main() {
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
 
-	/*c := cors.New(cors.Options{
+	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})
 
-	handler := c.Handler(mux)*/
+	handler := c.Handler(mux)
 	serverPort := ":8080"
 
 	fmt.Printf("Fleet Management API server starting on http://localhost%s...", serverPort)
-	log.Fatal(http.ListenAndServe(serverPort, mux))
+	log.Fatal(http.ListenAndServe(serverPort, handler))
 }
