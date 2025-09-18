@@ -9,6 +9,7 @@ import (
 	"github.com/kwagmire/fleet-management-api/internal/pkg/auth"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/db"
 	"github.com/kwagmire/fleet-management-api/internal/pkg/models"
+	"github.com/lib/pq"
 )
 
 func AddVehicle(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +64,10 @@ func AddVehicle(w http.ResponseWriter, r *http.Request) {
 	err = db.DB.QueryRow(query, thisVehicle.Make, thisVehicle.Model,
 		thisVehicle.Year, thisVehicle.LicensePlate, thisVehicle.Status, userDetails.UserID).Scan(&thisVehicle.ID)
 	if err != nil {
+		if dbError, ok := err.(*pq.Error); ok && dbError.Code.Name() == "check_violation" {
+			respondWithError(w, "Vehicle doesn't meet system requirements", http.StatusBadRequest)
+			return
+		}
 		respondWithError(w, "Failed to add vehicle: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

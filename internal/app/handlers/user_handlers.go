@@ -76,6 +76,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		if dbError, ok := err.(*pq.Error); ok && dbError.Code.Name() == "unique_violation" {
 			http.Error(w, "Email already exists", http.StatusConflict)
 			return
+		} else if ok && dbError.Code.Name() == "check_violation" {
+			http.Error(w, "User can only register as a driver or vehicle_owner", http.StatusBadRequest)
+			return
 		}
 		respondWithError(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
 		return
