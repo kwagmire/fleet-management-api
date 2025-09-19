@@ -88,6 +88,10 @@ func main() {
 		"GET /drivers",
 		auth.AuthMiddleware(auth.RequirePermission("admin:read.driver", handlers.GetAllDrivers)),
 	)
+	mux.HandleFunc(
+		"GET /vehicle_owners",
+		auth.AuthMiddleware(auth.RequirePermission("admin:read.owner", handlers.GetAllOwners)),
+	)
 
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
