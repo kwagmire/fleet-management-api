@@ -16,12 +16,11 @@ type Vehicle struct {
 }
 
 // Similar structs for User, Driver, etc.
-type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"-"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+type VehicleOwner struct {
+	UserID    int    `json:"id"`
+	Fullname  string `json:"username"`
+	Email     string `json:"email"`
+	FleetSize int    `json:"fleet_size"`
 }
 
 type Driver struct {
