@@ -13,8 +13,6 @@ type Vehicle struct {
 	DriverEmail  sql.NullString `json:"driver_email"`
 	OwnerName    sql.NullString `json:"owner_name"`
 	OwnerEmail   sql.NullString `json:"owner_email"`
-	//CurrentLatitude  float64       `json:"current_latitude"`
-	//CurrentLongitude float64       `json:"current_longitude"`
 }
 
 // Similar structs for User, Driver, etc.
@@ -27,7 +25,13 @@ type User struct {
 }
 
 type Driver struct {
-	UserID    int    `json:"user_id"`
-	LicenseID string `json:"license_id"`
-	Assigned  bool   `json:"assigned"`
+	UserID              int            `json:"user_id"`
+	Fullname            string         `json:"fullname"`
+	Email               string         `json:"email"`
+	LicenseID           string         `json:"license_id"`
+	Assigned            bool           `json:"assigned"`
+	VehicleMake         sql.NullString `json:"vehicle_make"`
+	VehicleModel        sql.NullString `json:"vehicle_model"`
+	VehicleYear         sql.NullInt64  `json:"vehicle_year"`
+	VehicleLicensePlate sql.NullString `json:"vehicle_license_plate"`
 }
