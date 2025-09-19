@@ -138,7 +138,7 @@ func GetAllDrivers(w http.ResponseWriter, r *http.Request) {
 			drivers AS d
 			ON u.id = d.user_id
 		LEFT JOIN
-			vehicles AS u
+			vehicles AS v
 			ON d.user_id = v.driver_id
 		ORDER BY u.id ASC
 		LIMIT $1 OFFSET $2`
