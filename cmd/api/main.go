@@ -82,7 +82,7 @@ func main() {
 
 	mux.HandleFunc(
 		"GET /vehicles",
-		auth.AuthMiddleware(auth.RequirePermission("admin:read.driver", handlers.GetAllDrivers)),
+		auth.AuthMiddleware(auth.RequirePermission("admin:read.driver", handlers.GetAllVehicles)),
 	)
 	mux.HandleFunc(
 		"GET /drivers",
