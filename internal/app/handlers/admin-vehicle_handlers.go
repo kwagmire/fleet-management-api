@@ -180,7 +180,7 @@ func GetAllDrivers(w http.ResponseWriter, r *http.Request) {
 		"data":          drivers,
 		"page":          page,
 		"limit":         limit,
-		"total":         len(vehicles),
+		"total":         len(drivers),
 		"total_drivers": no_of_drivers,
 	})
 }
