@@ -253,10 +253,10 @@ func GetAllOwners(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
-		"data":          owners,
-		"page":          page,
-		"limit":         limit,
-		"total":         len(owners),
-		"total_drivers": no_of_owners,
+		"data":                 owners,
+		"page":                 page,
+		"limit":                limit,
+		"total":                len(owners),
+		"total_vehicle_owners": no_of_owners,
 	})
 }
