@@ -94,7 +94,7 @@ func main() {
 	)
 	mux.HandleFunc(
 		"PUT /vehicles/{id}/assign_driver",
-		auth.AuthMiddleware(auth.RequirePermission("admin:assign.driver", handlers.AssignDriverToVehicle)),
+		auth.AuthMiddleware(auth.RequirePermission("admin:assign.driver", handlers.AssignDriver)),
 	)
 
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
