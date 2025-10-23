@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -100,4 +103,80 @@ func GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 		"total":      len(vehicles),
 		"fleet_size": fleet_size,
 	})
+}
+
+func AssignDriver(w http.ResponseWriter, r *http.Request) {
+	// 1. Get vehicle ID from URL
+	vehicleIDStr := r.PathValue("id")
+	if vehicleIDStr == "" {
+		respondWithError(w, "Vehicle ID not found in URL", http.StatusBadRequest)
+		return
+	}
+	vehicleID, err := strconv.Atoi(vehicleIDStr)
+	if err != nil {
+		http.Error(w, "Invalid vehicle ID", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Decode the request body to get the driver ID
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		respondWithError(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+
+	var thisRequest models.AssignRequest
+	err = json.Unmarshal(body, &thisRequest)
+	if err != nil {
+		respondWithError(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	if thisRequest.DriverID == "" {
+		respondWithError(w, "All fields are required", http.StatusBadRequest)
+		return
+
+	}
+
+	var currentVehicleStatus string
+	var currentDriverAssigned bool
+
+	// Check if vehicle is available
+	err = db.DB.QueryRow("SELECT status FROM vehicles WHERE id = $1", vehicleID).Scan(&currentVehicleStatus)
+	if err != nil {
+		respondWithError(w, "Vehicle not found", http.StatusNotFound)
+		return
+	}
+	if currentVehicleStatus != "available" {
+		respondWithError(w, "Vehicle is not available for assignment", http.StatusConflict)
+		return
+	}
+
+	// Check if driver is unassigned
+	err = db.DB.QueryRow("SELECT assigned FROM drivers WHERE user_id = $1", thisRequest.DriverID).Scan(&currentDriverAssigned)
+	if err != nil {
+		respondWithError(w, "Driver not found", http.StatusNotFound)
+		return
+	}
+	if currentDriverAssigned {
+		respondWithError(w, "Driver is already assigned to a vehicle", http.StatusConflict)
+		return
+	}
+
+	// 5. Update both the vehicle and driver records
+	_, err = db.DB.Exec("UPDATE vehicles SET driver_id = $1, status = 'in_use' WHERE id = $2", thisRequest.DriverID, vehicleID)
+	if err != nil {
+		log.Printf("Failed to update vehicle: %v", err)
+		respondWithError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = db.DB.Exec("UPDATE drivers SET assigned = true WHERE user_id = $1", thisRequest.DriverID)
+	if err != nil {
+		log.Printf("Failed to update driver: %v", err)
+		respondWithError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"message": "Vehicle assigned successfully"})
 }

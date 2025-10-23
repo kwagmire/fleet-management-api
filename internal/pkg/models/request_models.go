@@ -19,3 +19,7 @@ type AddVehicleRequest struct {
 	Year         int    `json:"year"`
 	LicensePlate string `json:"license_plate"`
 }
+
+type AssignRequest struct {
+	DriverID string `json:"driver_id"`
+}
