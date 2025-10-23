@@ -30,7 +30,7 @@ import (
 		return
 	}
 
-	query := `
+ 	query := `
 		INSERT INTO users (
 			fullname,
 			password_hash,
@@ -92,10 +92,10 @@ func main() {
 		"GET /vehicle_owners",
 		auth.AuthMiddleware(auth.RequirePermission("admin:read.owner", handlers.GetAllOwners)),
 	)
-	/*mux.HandleFunc(
+	mux.HandleFunc(
 		"PUT /vehicles/{id}/assign_driver",
-		auth.AuthMiddleware(auth.RequirePermission("admin:assign.vehicle", handlers.AssignDriverToVehicle)),
-	)*/
+		auth.AuthMiddleware(auth.RequirePermission("admin:assign.driver", handlers.AssignDriverToVehicle)),
+	)
 
 	//mux.HandleFunc("PUT /todos/", auth.AuthMiddleware(handlers.UpdateTodo))
 	//mux.HandleFunc("DELETE /todos/", auth.AuthMiddleware(handlers.DeleteTodo))
