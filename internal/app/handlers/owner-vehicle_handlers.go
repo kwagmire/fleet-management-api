@@ -84,7 +84,7 @@ func AddVehicle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, thisVehicle)
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{"message": "Vehicle added successfully"})
 }
 
 func GetMyVehicles(w http.ResponseWriter, r *http.Request) {
@@ -173,5 +173,11 @@ func GetMyVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]interface{}{"data": vehicles, "page": page, "limit": limit, "total": len(vehicles), "fleet_size": fleet_size})
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"data":       vehicles,
+		"page":       page,
+		"limit":      limit,
+		"total":      len(vehicles),
+		"fleet_size": fleet_size,
+	})
 }
